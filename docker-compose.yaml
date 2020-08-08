@@ -11,8 +11,6 @@ services:
       MYSQL_DATABASE: test
       MYSQL_USER: user
       MYSQL_PASSWORD: user
-    volumes:
-      - ./db_data:/var/lib/mysql
 
   pma:
     image: phpmyadmin/phpmyadmin
@@ -30,6 +28,7 @@ services:
     hostname: php-fpm
     restart: "always"
     environment:
+      XDEBUG_MAX_NESTING_LEVEL: -1
       COMPOSER_MEMORY_LIMIT: -1
     volumes:
       - ./:/app
@@ -46,7 +45,7 @@ services:
       WEB_DOCUMENT_INDEX: index.php
       WEB_PHP_SOCKET: php-fpm:9000
     ports:
-      - "8200:80"
+      - "8000:80"
     volumes:
       - ./:/app
     depends_on:
