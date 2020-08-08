@@ -1,0 +1,53 @@
+version: "3.3"
+
+services:
+  mysql:
+    image: mysql:5.7
+    hostname: mysql
+    restart: "always"
+    command: ['mysqld', '--character-set-server=utf8', '--collation-server=utf8_general_ci']
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: test
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
+    volumes:
+      - ./db_data:/var/lib/mysql
+
+  pma:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - "30005:80"
+    environment:
+      - PMA_HOST=mysql
+      - PMA_USER=root
+      - PMA_PASSWORD=root
+    links:
+      - mysql
+
+  php-fpm:
+    image: webdevops/php-dev:7.2
+    hostname: php-fpm
+    restart: "always"
+    environment:
+      COMPOSER_MEMORY_LIMIT: -1
+    volumes:
+      - ./:/app
+    working_dir: /app
+    depends_on:
+      - mysql
+
+  nginx:
+    image: webdevops/nginx
+    hostname: nginx
+    restart: "always"
+    environment:
+      WEB_DOCUMENT_ROOT: /app/public
+      WEB_DOCUMENT_INDEX: index.php
+      WEB_PHP_SOCKET: php-fpm:9000
+    ports:
+      - "8200:80"
+    volumes:
+      - ./:/app
+    depends_on:
+      - php-fpm
